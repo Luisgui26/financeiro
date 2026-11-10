@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Saldo — finanças pessoais
 
-## Getting Started
+Aplicação Next.js para acompanhar receitas e despesas cadastradas manualmente. Os valores são armazenados em centavos inteiros, e as operações são vinculadas ao usuário autenticado.
 
-First, run the development server:
+## Requisitos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Node.js 20.19 ou superior e um banco PostgreSQL do Neon. Use um banco ou branch dedicado para desenvolvimento.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuração local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Instale as dependências: `npm install`.
+2. No Neon, crie ou selecione um projeto e uma branch de desenvolvimento. Copie a URL **pooled** e a URL **direct** do mesmo banco.
+3. Copie `.env.example` para `.env.local`. Defina `DATABASE_URL` com a URL pooled, `DATABASE_URL_UNPOOLED` com a URL direct e `NEON_AUTH_BASE_URL` com a URL do Neon Auth da branch e `NEON_AUTH_COOKIE_SECRET` com um segredo aleatório de pelo menos 32 caracteres. Nunca versionar esse arquivo.
+4. Aplique as migrações: `npm run db:migrate`.
+5. Insira as categorias iniciais: `npm run db:seed` (o seed pode ser executado novamente sem duplicar categorias).
+6. Inicie: `npm run dev`. Acesse http://localhost:3000 e crie uma conta.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Para alterações no esquema, edite `src/db/schema.ts`, execute `npm run db:generate`, revise a migração gerada e aplique-a em uma branch de teste antes de produção.
 
-## Learn More
+## Verificações
 
-To learn more about Next.js, take a look at the following resources:
+- `npm test`: regras de valores, comparação e limites de mês.
+- `npm run lint`: análise estática.
+- `npm run build`: compilação de produção com webpack.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy na Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Importe a pasta `financeiro` como raiz do projeto. Configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `NEON_AUTH_BASE_URL` e `NEON_AUTH_COOKIE_SECRET` nas variáveis de ambiente do projeto. Execute migrações e seed com a URL direta no ambiente apropriado antes de disponibilizar a aplicação. Use um segredo diferente para cada ambiente.
 
-## Deploy on Vercel
+## Escopo e limitações atuais
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O projeto inclui autenticação gerenciada pelo Neon Auth, cadastro manual, dashboard e análises. O histórico aplica os filtros no banco e é paginado. O cadastro, login, sessão e lançamento manual foram testados com Neon; ainda são necessários testes automatizados de isolamento entre usuários e revisão de segurança antes de uso com dados financeiros reais. Integração bancária e lançamentos recorrentes não fazem parte desta versão.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+A migração inicial em `drizzle-neon` inclui uma chave estrangeira para `neon_auth.user`; mantenha essa referência ao alterar o esquema. O diretório `drizzle` contém a versão anterior, não usada pela configuração atual.
+

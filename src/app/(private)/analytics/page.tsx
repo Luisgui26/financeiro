@@ -1,0 +1,9 @@
+import { auth } from "@/auth";
+import { history, monthData, selectedMonth, shiftMonth } from "@/lib/data";
+import { formatMoney, variation } from "@/lib/money";
+import { FinancialCharts } from "@/components/charts";
+export default async function Analytics({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
+ const month = selectedMonth((await searchParams).month); const session = await auth(); const [current, previous, series] = await Promise.all([monthData(session!.user!.id!, month), monthData(session!.user!.id!, shiftMonth(month, -1)), history(session!.user!.id!, month)]);
+ const names = [...new Set([...current.grouped.map(c => c.name), ...previous.grouped.map(c => c.name)])];
+ return <><div className="topline">ANÁLISES</div><header className="page-header"><div><p className="eyebrow">ENTENDA SEUS HÁBITOS</p><h1>Comparação mensal</h1><p className="muted">Veja como suas despesas mudaram por categoria.</p></div><form><input type="month" name="month" defaultValue={month}/><button className="subtle">Ir</button></form></header><FinancialCharts history={series} categories={current.grouped}/><section className="card activity"><div className="section-head"><div><h2>Despesas por categoria</h2><p>Mês selecionado comparado ao mês anterior.</p></div></div>{names.length ? names.map(name => { const now = current.grouped.find(c => c.name === name)?.total || 0; const old = previous.grouped.find(c => c.name === name)?.total || 0; const v = variation(now, old); return <div className="transaction" key={name}><div className="transaction-name"><strong>{name}</strong><small>Anterior: {formatMoney(old)}</small></div><strong>{formatMoney(now)}</strong><span className="muted">{v.percent === null ? "Sem base" : `${v.percent.toFixed(1)}%`}</span></div>; }) : <div className="empty"><strong>Ainda não há despesas para comparar</strong></div>}</section></>;
+}

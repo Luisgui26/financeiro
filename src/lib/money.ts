@@ -12,7 +12,7 @@ export function formatMoney(cents: number): string {
 }
 
 export function variation(current: number, previous: number) {
-  return { difference: current - previous, percent: previous === 0 ? null : ((current - previous) / Math.abs(previous)) * 100 };
+  return { difference: current - previous, percent: previous === 0 ? null : ((current - previous) / previous) * 100 };
 }
 
 export function monthBounds(month: string) {
